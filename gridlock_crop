@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+
+"""Crop image files to a given specification."""
+
+
+import argparse
+import sys
+from util import SPLIT_DIR, CROPPED_DIR
+from util import read_config, get_config, get_num_pages
+from util import single_task, parallel_task
+
+
+def crop_one_page(page_key, crop_spec, force):
+    """Crop a single page based on its key."""
+    in_file = f"{SPLIT_DIR}/{page_key}.png"
+    out_file = f"{CROPPED_DIR}/{page_key}.png"
+    command = f"magick {in_file} -crop {crop_spec} +repage {out_file}"
+    single_task(ensure_dirs=[SPLIT_DIR, CROPPED_DIR],
+                input_file=in_file,
+                output_file=out_file,
+                action="crop",
+                command=command,
+                force=force)
+
+
+def crop_all_pages(prefix, expected_pages, force):
+    """Crop these pages."""
+    parallel_task(prefix=prefix, input_dir=SPLIT_DIR, output_dir=CROPPED_DIR,
+                  input_ext="png", output_ext="png",
+                  action="crop", command="gridlock_crop", force=force)
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Crop images to the specification in the config.",
+        usage="gridlock_crop [-f] [PAGE-KEY]"
+    )
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('page_key', type=str, nargs='?', default='all',
+                        help='The required page key, eg "XYZ-001".' +
+                        'If not provided, or "all" is speciefied, ' +
+                        'will do all pending pages')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point"""
+    args = parse_args()
+    config = read_config()
+
+    if args.page_key == 'all':
+        prefix = get_config(config, "split", "prefix")
+        expected_pages = get_num_pages(config)
+        crop_all_pages(prefix, expected_pages, args.force)
+        print("Now visually check cropped files and run 'gridlock straighten'")
+    else:
+        crop_from = get_config(config, "crop", "crop_from")
+        crop_to = get_config(config, "crop", "crop_to")
+        [x_size, y_size] = [crop_to[dim] - crop_from[dim] for dim in range(2)]
+        crop_spec = f"{x_size}x{y_size}+{crop_from[0]}+{crop_from[1]}"
+        crop_one_page(args.page_key, crop_spec, args.force)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

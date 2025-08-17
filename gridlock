@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+
+"""Front end for gridlock commands."""
+
+import os
+import subprocess
+import sys
+
+
+def usage():
+    """Print usage details."""
+    print('gridlock - convert PDF code printouts to text\n')
+    print('Available sub-commands\n')
+    print('gridlock new - create new project directory')
+    print('gridlock split - split PDF file to images')
+    print('gridlock crop - crop page images to include only useful text')
+    print('gridlock straighten - remove skew from page images')
+    print('gridlock segment - find the best grid that matches page images')
+    print('gridlock templates - create templates from segmented pages')
+    print('gridlock text - use a LLM to get text from a page image')
+    print('gridlock merge - combine the template and text')
+    print('gridlock collect - assemble merged pages into a single file')
+    sys.exit(0)
+
+
+def main():
+    """Main program."""
+    if len(sys.argv) < 2:
+        usage()
+
+    verb = sys.argv[1]
+    if verb not in {'new', 'split', 'crop', 'straighten', 'segment',
+                    'templates', 'text', 'merge', 'collect'}:
+        usage()
+
+    # Force path to directory of this scropt, in case running without this on
+    # path yet
+    path = os.path.dirname(os.path.realpath(__file__))
+    command = [f"{path}/gridlock_{verb}"]
+    command += sys.argv[2:]
+    result = subprocess.run(command)
+    sys.exit(result.returncode)
+
+
+if __name__ == "__main__":
+    main()

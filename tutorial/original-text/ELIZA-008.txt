@@ -1,0 +1,62 @@
+       O'E                                                       000420
+       NEWBOT.(LSSCPY.(INPUT,LIST.(9)),KEY(HASH.                  000430
+     1 (TOP.(INPUT),5)))                                         000440
+       T'O BEGIN                                                 000450
+ E'L                                                             000460
+ R* * * * * * * * * * BEGIN MAJOR LOOP                           000470
+START  TREAD.(MTLIST.(INPUT),0)                                  000480
+       KEYWRD=0                                                  000490
+       PREDNC=0                                                  000500
+       LIMIT=LIMIT+1                                             000510
+       W'R LIMIT .E. 5, LIMIT=1                                  000520
+       W'R LISTMT.(INPUT) .E. 0, T'O ENDPLA                      000530
+       IT=0                                                      000540
+       W'R TOP.(INPUT) .E. $+$                                   000550
+       CHANGE.(KEY,MYTRAN)                                       000560
+       T'O START                                                 000570
+ E'L                                                             000580
+       W'R TOP.(INPUT) .E. $*$, T'O NEWLST                       000590
+       S=SEQRDR.(INPUT)                                          000600
+NOTYET W'R S .L. 0                                               000610
+       SEQLR.(S,F)                                               000620
+       T'O NOTYET                                                000630
+       O'E                                                       000640
+       WORD=SEQLR.(S,F)                                          000650
+       W'R WORD .E. $.$ .OR. WORD .E. $BUT$                      000660
+       W'R IT .E. 0                                              000670
+       NULSTL.(INPUT,LSPNTR.(S),JUNK)                            000680
+       MTLIST.(JUNK)                                             000690
+       T'O NOTYET                                                000700
+       O'E                                                       000710
+       NULSTR.(INPUT,LSPNTR.(S),JUNK)                            000720
+       MTLIST.(JUNK)                                             000730
+       T'O ENDTXT                                                000740
+ E'L                                                             000750
+ E'L                                                             000760
+       W'R F .G. 0, T'O ENDTXT                                   000770
+       I=HASH.(WORD,5)                                           000780
+       SCANER=SEQRDR.(KEY(I))                                    000790
+       SF=0                                                      000800
+       T'H SEARCH, FOR J=0,0, SF .G. 0                           000810
+       CAND= SEQLR.(SCANER,SF)                                   000820
+       W'R SF .G. 0, T'O NOTYET                                  000830
+SEARCH W'R TOP.(CAND) .E. WORD, T'O KEYFND                       000840
+KEYFND READER=TESTS.(CAND,S)                                     000850
+       W'R READER .E. 0, T'O NOTYET                              000860
+       W'R LSTNAM.(CAND) .NE. 0                                  000870
+       DL=LSTNAM.(CAND)                                          000880
+SEQ    W'R S .L. 0                                               000890
+       SEQLR.(S,F)                                               000900
+       T'O SEQ                                                   000910
+       O'E                                                       000920
+       NEWTCP.(DL,LSPNTR.(S))                                    000930
+       O'E                                                       000940
+ E'L                                                             000950
+       O'E                                                       000960
+       NEXT=SEQLR.(READER,FR)                                    000970
+       W'R FR .G. 0, T'O NOTYET                                  000980
+       W'R IT .E. 0 .AND. FR .E. 0                               000990
+PLCKEY IT=READER                                                 001000
+       KEYWRD=WORD                                               001010
+                                                                 001020
+

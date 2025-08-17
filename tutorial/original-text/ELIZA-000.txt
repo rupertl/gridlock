@@ -1,0 +1,62 @@
+PRINT,T0109,2531,SPEAK,MAD                                                   T0109 2531
+---------------------------------------------------------------------------------------
+CHANGE   MAD                                                                  000010
+         EXTERNAL FUNCTION (KEY,MYTRAN)                                       000020
+         NORMAL MODE IS INTEGER                                               000030
+         ENTRY TO CHANGE.                                                     000040
+         LIST.(INPUT)                                                         000050
+         V$S G(1)=$TYPE$,$SUBST$,$APPEND$,$ADD$,                               000060
+         1$START$,$RANKS$,$DISPLAS                                             000070
+         V$S SNUMB = $ I3 *$                                                   000080
+---------------------------------------------------------------------------------------
+CHANGE   PRINT COMMENT $PLEASE INSTRUCT ME$                                   001400
+         LISTRD.(MTLIST.(INPUT),O)                                            001410
+         JOB=POPTOP.(INPUT)                                                   001420
+         T'H IDENT, FOR J=1,1, J.G. 7                                         001430
+IDENT    W'R G(J) .E. JOB, T'O THEMA                                          001440
+         PRINT COMMENT $CHANGE NOT RECOGNIZED$                                001450
+         T'O CHANGE                                                           001460
+THEMA    W'R J .E. 5, F'N IRALST.(INPUT)                                      001470
+         W'R J .E. 7                                                          001480
+         T'H DISPLA, FOR I=0,1, I .G. 32                                      001490
+         W'R LISTMT.(KEY(I)) .E. O, T'O DISPLA                                001500
+         S=SEQRDR.(KEY(I))                                                    001510
+READ(7)  NEXT=SEQLR.(S,F)                                                     001520
+         W'R F .G. O, T'O DISPLA                                              001530
+         PRINT COMMENT $**$                                                   001540
+         TPRINT.(NEXT,O)                                                      001550
+         PRINT FORMAT SNUMB,I                                                 001560
+         PRINT COMMENT $ $                                                    001570
+         T'O READ(7)                                                          001580
+DISPLA   CONTINUE                                                             001590
+         PRINT COMMENT $ $                                                    001600
+         PRINT COMMENT $MEMORY LIST FOLLOWS$                                  001610
+         PRINT COMMENT $ $                                                    001620
+         T'H MEMLST, FOR I=1, 1, I .G. 4                                      001630
+MEMLST   TXTPRT.(MYTRAN(I),O)                                                 001640
+         T'O CHANGE                                                           001650
+         E'L                                                                  001660
+         THEME=PCPTOP.(INPUT)                                                 001670
+         SUBJCT=KEY(HASH.(THEME,5))                                           001680
+         S=SEQRDR.(SUBJCT)                                                    001690
+LOOK     TERM=SEQLR.(S,F)                                                     001700
+         W'R F .G. O, T'O FAIL                                                001710
+         W'R TOP.(TERM) .E. THEME, T'O FOUND                                  001720
+         T'O LOOK                                                             001730
+FOUND    T'O DELTA(J)                                                         001740
+DELTA(1) TPRINT.(TERM,O)                                                      001750
+         T'O CHANGE                                                           001760
+FAIL     PRINT COMMENT $LIST NOT FOUND$                                       001770
+         T'O CHANGE                                                           001780
+DELTA(2) S=SEQRDR.(TERM)                                                      001790
+         OLD=POPTOP.(INPUT)                                                   001800
+READ(1)  OBJCT=SEQLR.(S,F)                                                    001810
+         W'R F .G. O, T'O FAIL                                                001820
+         W'R F .NE. O, T'O READ(1)                                            001830
+         INSIDE=SEQRDR.(OBJCT)                                                001840
+READ(2)  IT=SEQLR.(INSIDE,F)                                                  001850
+         W'R F .G. O, T'O READ(1)                                             001860
+         SIT=SEQRDR.(IT)                                                      001870
+         SOLD=SEQRDR.(OLD)                                                    001880
+ITOLD    TOLD=SEQLR.(SOLD,FOLD)                                               001890
+

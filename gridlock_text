@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+
+"""Extract text from the page image file."""
+
+
+import argparse
+import sys
+from ocr_gemini import ocr_gemini
+from util import PROMPT_FILE, PAGES_DIR, TEXT_DIR
+from util import read_config, get_config, mkdir, file_not_empty, parallel_task
+
+
+def get_prompt():
+    """Read the prompt file."""
+    with open(PROMPT_FILE, 'r', encoding='utf-8') as f:
+        prompt = f.read()
+    return prompt
+
+
+def get_text_one_page(page_key, debug, force):
+    """Extract text from one page identified by the key."""
+    page_file = f"{PAGES_DIR}/{page_key}.png"
+    text_file = f"{TEXT_DIR}/{page_key}.txt"
+    mkdir(TEXT_DIR)
+
+    # Skip if we already have the file
+    if file_not_empty(text_file) and not force:
+        print("Skipping as already exists")
+        sys.exit(0)
+
+    config = read_config()
+    ocr_system = get_config(config, "text", "ocr_system")
+    if ocr_system != "gemini":
+        print(f"OCR system {ocr_system} not supported")
+        sys.exit(1)
+    ocr_strategy = get_config(config, "text", "ocr_strategy")
+    if ocr_strategy != 'page':
+        print(f"OCR strategy {ocr_strategy} not supported")
+        sys.exit(1)
+    model = get_config(config, "text", "gemini_model")
+    prompt = get_prompt()
+    text = ocr_gemini(page_file, model, prompt, debug)
+
+    with open(text_file, "w", encoding='utf-8') as text_file:
+        print(text, file=text_file)
+
+
+def get_text_all_pages(prefix, force):
+    """Get text for all pages."""
+    parallel_task(prefix=prefix, input_dir=PAGES_DIR, output_dir=TEXT_DIR,
+                  input_ext="png", output_ext="txt",
+                  action="getting text", command="gridlock_text", force=force)
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Extract text from the image file.",
+        usage="gridlock_text [-d] [-f] [PAGE-KEY]"
+    )
+
+    parser.add_argument('-d', action='store_true',
+                        dest='debug', help='Enable debug mode to show more' +
+                        "OCR information")
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('page_key', type=str, nargs='?', default='all',
+                        help='The required page key, eg "XYZ-001".' +
+                        'If not provided, or "all" is speciefied, ' +
+                        'will do all pending pages')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point to system."""
+    args = parse_args()
+    config = read_config()
+
+    if args.page_key == 'all':
+        prefix = get_config(config, "split", "prefix")
+        get_text_all_pages(prefix, args.force)
+        print("Now run 'gridlock merge'")
+    else:
+        get_text_one_page(args.page_key, args.debug, args.force)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

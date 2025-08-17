@@ -1,0 +1,187 @@
+#!/usr/bin/python3
+
+"""Make templates and grid images from segmented pages."""
+
+
+import argparse
+import sys
+from PIL import Image, ImageDraw, ImageStat
+from util import PAGES_DIR, GRIDS_DIR, TEMPLATES_DIR
+from util import read_config, get_config, get_page_attrs
+from util import parallel_task, count_files, mkdir
+
+
+def prepare_square(width, height, fill):
+    """Prepare a semi-transparent square tile of dimensions width x
+    height and guven fill to be pasted on the image."""
+    square = Image.new('RGBA', (width, height), (255, 255, 255, 127))
+    square_draw = ImageDraw.Draw(square)
+    square_draw.rectangle((0, 0, width, height),
+                          outline='red', fill=fill, width=1)
+    return square
+
+
+def draw_grid_make_template(page_key, pa):
+    """Draw a grid on the page and save to grid_file. Make an initial
+    template at the same time we are scanning and return it."""
+    page_file = f"{PAGES_DIR}/{page_key}.png"
+    grid_file = f"{GRIDS_DIR}/{page_key}.png"
+    config = read_config()
+    variance_threshold = get_config(config, "grid", "variance_threshold")
+    char_width = pa["grid_x_spacing"]
+    char_height = pa["grid_y_spacing"]
+
+    img = Image.open(page_file)
+    max_x, max_y = img.size
+    x, y = pa["x_offset"], pa["y_offset"]
+    w, h = int(char_width), int(char_height)
+    char_square = prepare_square(w, h, (255, 255, 255, 127))
+    whitespace_square = prepare_square(w, h, (0, 50, 0, 127))
+    template = []
+
+    while y < max_y:
+        template_line = ""
+        yy = y + char_height
+        if yy > max_y:
+            break
+        while x < max_x:
+            xx = x + char_width
+            if xx > max_x:
+                break
+            tile = img.crop((x, y, xx, yy))
+            var = ImageStat.Stat(tile).var[0]
+            if var > variance_threshold:
+                img.paste(char_square, (int(x), int(y)), char_square)
+                template_line += '#'
+            else:
+                img.paste(whitespace_square, (int(x), int(y)),
+                          whitespace_square)
+                template_line += ' '
+            x = xx
+        y = yy
+        x = pa["x_offset"]
+        template.append(template_line)
+    img.save(grid_file)
+    return template
+
+
+def remove_surrounding_blank_lines(template):
+    """Return a copy of template with top and bottom blank lines removed."""
+    first_non_blank = -1
+    last_non_blank = -1
+    for index, line in enumerate(template):
+        is_blank = line.strip() == ''
+        if not is_blank:
+            if first_non_blank < 0:
+                first_non_blank = index
+            last_non_blank = index
+    if first_non_blank < 0:     # completely empty page
+        return []
+    return template[first_non_blank:last_non_blank+1]
+
+
+def set_left_margin(template, margin):
+    """If >=0, shift the whole template left/right so at least the
+    first 'margin' columns are blank."""
+    if margin < 0:
+        return template
+    min_margin = len(template[0])
+    for line in template:
+        min_margin = min(min_margin, len(line) - len(line.lstrip()))
+    diff = margin - min_margin
+    if diff == 0:
+        return template
+    new_template = []
+    for line in template:
+        if diff > 0:
+            line = ' ' * diff + line
+        else:
+            line = line[-diff:]
+        new_template.append(line)
+    return new_template
+
+
+def right_pad(template, length):
+    """Pad templates lines on the right with spaces so the line has
+    the given length."""
+    if length == 0:
+        return template
+    new_template = []
+    for line in template:
+        # Remove existing spaces at end before padding
+        line = line.rstrip().ljust(length)
+        new_template.append(line)
+    return new_template
+
+
+def finalise_template(template, template_file_name):
+    """Adjust the initial template and save to a file."""
+    config = read_config()
+    template = remove_surrounding_blank_lines(template)
+    template = set_left_margin(template, get_config(config, "template",
+                                                    "char_left_margin"))
+    template = right_pad(template, get_config(config, "template",
+                                              "char_rigjt_pad"))
+    with open(template_file_name, "w", encoding='utf-8') as template_file:
+        for line in template:
+            print(line, file=template_file)
+
+
+def make_one_template(page_key, force):
+    """Make a single template and grid."""
+    mkdir(GRIDS_DIR)
+    mkdir(TEMPLATES_DIR)
+    grid_file = f"{GRIDS_DIR}/{page_key}.png"
+    template_file = f"{TEMPLATES_DIR}/{page_key}.txt"
+    if count_files(grid_file) == 1 and count_files(template_file) == 1:
+        if not force:
+            print("Grid and template already exist""")
+            sys.exit(0)
+    page_attrs = get_page_attrs(page_key)
+    template = draw_grid_make_template(page_key, page_attrs)
+    finalise_template(template, template_file)
+
+
+def make_all_templates(prefix, force):
+    """Make templates for all keys."""
+    parallel_task(prefix=prefix, input_dir=PAGES_DIR, output_dir=TEMPLATES_DIR,
+                  input_ext="png", output_ext="txt",
+                  action="make templates", command="gridlock_templates",
+                  force=force)
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Generate templates from segmented pages.",
+        usage="gridlock_templates [-f] [PAGE-KEY]"
+    )
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('page_key', type=str, nargs='?', default='all',
+                        help='The required page key, eg "XYZ-001".' +
+                        'If not provided, or "all" is speciefied, ' +
+                        'will do all pending pages')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point"""
+    args = parse_args()
+    config = read_config()
+
+    if args.page_key == 'all':
+        prefix = get_config(config, "split", "prefix")
+        make_all_templates(prefix, args.force)
+        print("Now visually check grids")
+    else:
+        make_one_template(args.page_key, args.force)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

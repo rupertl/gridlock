@@ -1,0 +1,50 @@
+#!/usr/bin/python3
+
+"""
+Create a new project directory for gridlock, copying config files.
+
+"""
+
+# Note: this can be run outside a virtual env, so should not use local
+# modules
+
+import argparse
+import os
+import shutil
+import sys
+
+
+def get_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Create a new gridlock project.",
+        usage="gridlock_new PROJECT"
+    )
+
+    parser.add_argument('project', type=str,
+                        help='The name of the project directory to create')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main program."""
+    args = get_args()
+    project = args.project
+    if os.path.exists(project):
+        print(f"{project} directory already exists.")
+        sys.exit(1)
+    os.mkdir(project)
+    gridlock_root = os.path.dirname(os.path.realpath(__file__))
+    for file in ["gridlock.env", "config.yaml", "prompt.md"]:
+        shutil.copy(f"{gridlock_root}/{file}", project)
+    print(f"{project} created. Do: ")
+    print(f"    cd {project}")
+    print("    source gridlock.env")
+    print("Then edit config.yaml for your document and run 'gridlock split'")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

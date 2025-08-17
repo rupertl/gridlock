@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+
+"""Straighten image files."""
+
+
+import argparse
+import sys
+from util import CROPPED_DIR, PAGES_DIR
+from util import read_config, get_config
+from util import single_task, parallel_task
+
+
+def straighten_one_page(page_key, force):
+    """Straighten a single page based on its key."""
+    in_file = f"{CROPPED_DIR}/{page_key}.png"
+    out_file = f"{PAGES_DIR}/{page_key}.png"
+    command = f"deskew -f rgb24 -s s -b FFFFFF -l 0.0001 -o {out_file} " + \
+        f"{in_file} > /dev/null 2>&1"
+
+    single_task(ensure_dirs=[CROPPED_DIR, PAGES_DIR],
+                input_file=in_file,
+                output_file=out_file,
+                action="straighten",
+                command=command,
+                force=force)
+
+
+def straighten_all_pages(prefix, force):
+    """Straighten these pages."""
+    parallel_task(prefix=prefix, input_dir=CROPPED_DIR, output_dir=PAGES_DIR,
+                  input_ext="png", output_ext="png",
+                  action="straighten", command="gridlock_straighten", force=force)
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Straighten images to the specification in the config.",
+        usage="gridlock_straighten [-f] [PAGE-KEY]"
+    )
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('page_key', type=str, nargs='?', default='all',
+                        help='The required page key, eg "XYZ-001".' +
+                        'If not provided, or "all" is speciefied, ' +
+                        'will do all pending pages')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point"""
+    args = parse_args()
+    config = read_config()
+
+    if args.page_key == 'all':
+        prefix = get_config(config, "split", "prefix")
+        straighten_all_pages(prefix, args.force)
+        print("Now visually check straightened files and run 'gridlock segment'")
+    else:
+        straighten_one_page(args.page_key, args.force)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

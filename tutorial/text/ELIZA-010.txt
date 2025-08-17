@@ -1,0 +1,62 @@
+             OR W'R FR .L. 0 .AND. NEXT .G. PREDNC                      001030
+             PREDNC=NEXT                                               001040
+             NEXT=SEQLR.(READER,FR)                                    001050
+             T'O PLCKEY                                                001060
+        Q*E                                                            001070
+             T'O NOTYET                                                001080
+        E*L                                                            001090
+             T'O NOTYET                                                001100
+        R* * * * * * * * * * END OF MAJOR LOOP                         001110
+ENDTXT       W'R IT .E. 0                                              001120
+             W'R LIMIT .E. 4 .AND. LISTMT.(MYLIST) .NE. 0              001130
+             OUT=POPTOP.(MYLIST)                                       001140
+             TXTPRT.(OUT,O)                                            001150
+             IRALST.(OUT)                                              001160
+             T'O START                                                 001170
+        O*E                                                            001180
+             ES=BOT.(TOP.(KEY(32)))                                     001190
+             T'O TRY                                                   001200
+           E*L                                                         001210
+             OR W'R KEYWRD .E. MEMORY                                  001220
+             I=HASH.(BOT.(INPUT),2)+1                                  001230
+             NEWBOT.(REGEL.(MYTRAN(I),INPUT,LIST.(MINE)),MYLIST)        001240
+             SEQLL.(IT,FR)                                             001250
+             T'O MATCH                                                 001260
+        O*E                                                            001270
+             SEQLL.(IT,FR)                                             001280
+        R* * * * * * * * * * MATCHING ROUTINE                           001290
+MATCH        ES=SEQLR.(IT,FR)                                          001300
+             W'R TOP.(ES) .E. $=$                                       001310
+             S=SEQRDR.(ES)                                             001320
+             SEQLR.(S,F)                                               001330
+             WORD=SEQLR.(S,F)                                          001340
+             I=HASH.(WORD,5)                                           001350
+             SCANER=SEQRDR.(KEY(I))                                    001360
+SCAN         ITS=SEQLR.(SCANER,F)                                      001370
+             W'R F .G. 0, T'O NOMACH(LIMIT)                            001380
+             W'R WORD .E. TOP.(ITS)                                    001390
+             S=SEQRDR.(ITS)                                            001400
+SCANI        ES=SEQLR.(S,F)                                            001410
+             W'R F .NE. 0, T'O SCANI                                   001420
+             IT=S                                                      001430
+             T'O TRY                                                   001440
+        O*E                                                            001450
+             T'O SCAN                                                  001460
+        E*L                                                            001470
+        E*L                                                            001480
+             W'R FR .G. 0, T'O NOMACH(LIMIT)                           001490
+TRY          W'R YMATCH.(TOP.(ES),INPUT,MTLIST.(TEST)) .E. 0,T'O MATCH 001500
+             ESRDR=SEQRDR.(ES)                                         001510
+             SEQLR.(ESRDR,ESF)                                         001520
+             POINT=SEQLR.(ESRDR,ESF)                                   001530
+             POINTR=LSPNTR.(ESRDR)                                     001540
+             W'R ESF .E. 0                                             001550
+             NEWBOT.(1,POINTR)                                         001560
+             TRANS=POINT                                               001570
+             T'O HIT                                                   001580
+        O*E                                                            001590
+FNDHIT       T'H FNDHIT,FOR I=0,1, I .G. POINT                         001600
+             TRANS=SEQLR.(ESRDR,ESF)                                   001610
+             W'R ESF .G. 0                                             001620
+             SEQLR.(ESRDR,ESF)                                         001630
+

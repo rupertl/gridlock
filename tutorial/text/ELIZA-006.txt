@@ -1,0 +1,62 @@
+         O*E                                                                000220
+         POINT=LNKL.(STORE)                                                 000230
+         T'H DELETE , FOR K=0,1, K .G. J                                    000240
+         REMOVE.(LSPNTR.(STORE))                                            000250
+DELETE   SEQLR.(STORE,F)                                                    000260
+INSRT    NEW=SEQLR.(READER,FR)                                              000270
+         POINT=NEWTOP.(NEW,POINT)                                           000280
+         MRKNEG.(POINT)                                                     000290
+         W'R READER .L. 0, T'O INSRT                                        000300
+         MRKPOS.(POINT)                                                     000310
+         F'N READER                                                         000320
+         E'L                                                                000330
+         E'N                                                                000340
+                                                                            000010
+         EXTERNAL FUNCTION (A,B)                                            000020
+         NORMAL MODE IS INTEGER                                             000030
+         ENTRY TO FRBCD.                                                    000040
+         W'R LNKL.(A) .E. 0, T'O NUMBER                                     000050
+         B=A                                                                000060
+         F'N 0                                                              000070
+NUMBER   K=A*262144                                                         000080
+         B=BCDIC.(K)                                                        000090
+         F'N 0                                                              000100
+         E'N
+                                                                            000010
+         NORMAL MODE IS INTEGER                                             000020
+         DIMENSION KEY(32),MYTRAN(4)                                        000030
+         INITAS.(0)                                                         
+         PRINT COMMENT $WHICH SCRIPT DO YOU WISH TO PLAY$                   000060
+         READ FORMAT SNUMB,SCRIPT                                           000070
+         LIST.(TEST)                                                        000080
+         LIST.(INPUT)                                                       000090
+         LIST.(OUTPUT)                                                      000100
+         LIST.(JUNK)                                                        000110
+         LIMIT=1                                                            000120
+         LSSCPY.(TREAD.(INPUT,SCRIPT),JUNK)                                 000130
+         MTLIST.(INPUT)                                                     000140
+         T'H MLST, FOR I=1,1, I .G. 4                                       000150
+MLST     LIST.(MYTRAN(I))                                                   000160
+         MINE=0                                                             000170
+         LIST.(MYLIST)                                                      000180
+         T'H KEYLST, FOR I=0,1, I .G. 32                                    000220
+KEYLST   LIST.(KEY(I))                                                      000230
+         R* * * * * * * * * * READ NEW SCRIPT                              000240
+BEGIN    MTLIST.(INPUT)                                                     000250
+         NODLST.(INPUT)                                                     000260
+         LISTRD.(INPUT,SCRIPT)                                              000270
+         W'R LISTMT.(INPUT) .E. 0                                           000280
+         TXTPRT.(JUNK,0)                                                    000290
+         MTLIST.(JUNK)                                                      000300
+         T'O START                                                          000310
+         E'L                                                                000320
+         W'R TOP.(INPUT) .E. $NONE$                                         000330
+                   NEWTOP.(LSSCPY.(INPUT,LIST.(9)),KEY(32))                 000340
+         T'O BEGIN                                                          000350
+         OR W'R TOP.(INPUT) .E. $MEMORY$                                    000360
+         POPTOP.(INPUT)                                                     000370
+         MEMORY=POPTOP.(INPUT)                                              000380
+         T'H MEM, FOR I=1,1, I .G. 4                                        000390
+MEM      LSSCPY.(POPTOP.(INPUT),MYTRAN(I))                                  000400
+         T'O BEGIN                                                          000410
+

@@ -1,0 +1,90 @@
+#!/usr/bin/python3
+
+"""Find the grid and offset for each page.
+a) Run a prescan to find best fit grid size
+b) Prepare grid attributes for each page to attributes
+c) Write these attributes to a page config file KEY.json
+"""
+
+
+import argparse
+import glob
+import json
+import sys
+from util import PAGES_DIR, PRESCAN_FILE, ATTRIB_DIR
+from util import read_config, get_config, get_attrs_file_name
+from util import count_files, parallel_task, run_command
+
+
+def prescan_grid(prefix):
+    """Run a prescan to find best fit grid size."""
+    print("Running prescan")
+    command = "parallel --bar prescan_helper {} ::: " + \
+        f"{PAGES_DIR}/{prefix}*.png | sort > {PRESCAN_FILE}"
+    run_command(command)
+    if count_files(PRESCAN_FILE) != 1:
+        print("Prescan failed")
+        sys.exit(1)
+
+
+def prepare_grid_attributes(prefix):
+    """Prepare grid attributes for each page to work/attributes."""
+    parallel_task(prefix=prefix, input_dir=PAGES_DIR, output_dir=ATTRIB_DIR,
+                  input_ext="png", output_ext="txt",
+                  action="segment", command="attributes_helper", force=True)
+
+
+def write_page_config(prefix):
+    """Write page grid attributes to a page config file work/pages.json."""
+    # Always overwrite existing file
+    attrs_file = get_attrs_file_name(prefix)
+    print(f"Writing to {attrs_file}")
+    config = {}
+    for page_file in glob.glob(f"{ATTRIB_DIR}/{prefix}*.txt"):
+        with open(page_file, 'r', encoding='utf-8') as page:
+            attr = {}
+            for line in page:
+                line = line.rstrip()
+                file_name, key, value = line.split(' ')
+                attr[key] = float(value)
+            attr['page_file'] = file_name
+            page_key = file_name.split('/')[-1:][0].split('.')[0]
+            config[page_key] = attr
+    with open(attrs_file, 'w', encoding='utf-8') as out:
+        json.dump(config, out, sort_keys=True, indent=4)
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Segment pages.",
+        usage="gridlock_segment [-f]"
+    )
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point"""
+    args = parse_args()
+    config = read_config()
+    prefix = get_config(config, "split", "prefix")
+    attrs_file = get_attrs_file_name(prefix)
+
+    if count_files(attrs_file) == 1 and not args.force:
+        print(f"{attrs_file} already exists")
+    else:
+        prescan_grid(prefix)
+        prepare_grid_attributes(prefix)
+        write_page_config(prefix)
+        print(f"Now run 'gridlock templates' and 'gridlock text'")
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

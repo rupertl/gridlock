@@ -1,0 +1,62 @@
+      DIT=SEQLR.(SIT,FIT)                                        001900
+      W'R FOLD .E. DIT .AND. FOLD .LE. 0,T'O ITOLD                001910
+      W'R FOLD .G. 0, T'O OK(J)                                   001920
+      T'O READ(2)                                                 001930
+CK(2) SUBST.(PCPTOP.(INPUT),LSPNTR.(INSIDE))                      001940
+      T'O CHANGE                                                  001950
+OK(3) NEWBOT.(POPTOP.(INPUT),OBJCT)                               001960
+      T'O CHANGE                                                  001970
+DELTA(3) T'O DELTA(2)                                             001980
+DELTA(4) W'R NAMTST.(BOT.(TERM)) .E. 0                            001990
+      BOTTOM=POPBOT.(TERM)                                        002000
+      NEWBOT.(PCPTOP.(INPUT),TERM)                                002010
+      NEWBOT.(BOTTOM,TERM)                                        002020
+      O'E                                                         002030
+      NEWBOT.(POPTOP.(INPUT),TERM)                                002040
+      E'L                                                         002050
+      T'O CHANGE                                                  002060
+DELTA(6) S=SEQRDR.(TERM)                                          002070
+READ(6) OBJCT=SEQLR.(S,F)                                         002080
+      W'R F .G. 0, T'O FAIL                                       002090
+      W'R F .NE. 0, T'O READ(6)                                   002100
+      OBJCT=SEQLL.(S,F)                                           002110
+      W'R LNKL.(OBJCT) .E. 0                                      002120
+      SUBST.(POPTOP.(INPUT),LSPNTR.(S))                           002130
+      O'E                                                         002140
+      NEWTOP.(POPTOP.(INPUT),LSPNTR.(S))                          002150
+      E'L                                                         002160
+      T'O CHANGE                                                  002170
+      R* * * * * * * * * * END OF MODIFICATION ROUTINE             002180
+      E'N                                                         002200
+TPRINT MAD
+      EXTERNAL FUNCTION (LST)                                     000010
+      NORMAL MODE IS INTEGER                                      000020
+      ENTRY TO TPRINT.                                            000030
+      SA=SEQRDR.(LST)                                             000040
+      LIST.(OUT)                                                  000050
+READ  NEXT=SEQLR.(SA,FA)                                          000060
+      W'R FA .G. 0, T'O P                                         000070
+      W'R FA .E. 0, T'O B                                         000090
+      POINT=NEWBOT.(NEXT,OUT)                                     000100
+      W'R SA .L. 0, MRKNEG.(POINT)                                000110
+      T'O READ                                                    000120
+B     TXTPRT.(OUT,0)                                              000130
+      SEQLL.(SA,FA)                                               000140
+MORE  NEXT=SEQLR.(SA,FA)                                          000150
+      W'R TOP.(NEXT) .E. $=$,                                     000160
+      TXTPRT.(NEXT,0)                                             000170
+      T'O MORE                                                    000180
+      E'L                                                         000190
+      W'R FA .G. 0, T'O DONE                                      000200
+      PRINT COMMENT $ $                                           000210
+      SB=SEQRDR.(NEXT)                                            000220
+MEHR  TERM=SEQLR.(SB,FB)                                          000230
+      W'R FB .L.0                                                 000240
+      PRINT ON LINE FORMAT NUMBER, TERM                           000250
+      V'S NUMBER = $I3 *$                                         000260
+      T'O MEHR                                                    000270
+      E'L                                                         000280
+      W'R FB .G. 0, T'O MORE                                      000290
+      TXTPRT.(TERM,0)                                             000300
+      T'O MEHR                                                    000310
+

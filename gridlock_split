@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+
+"""Split a PDF to several pages in PNG format."""
+
+
+import argparse
+import sys
+from util import SPLIT_DIR
+from util import read_config, get_config, get_num_pages
+from util import count_files, mkdir, delete_files, run_command
+
+
+def split_page_images(file_name, first, last, prefix, expected_pages, force):
+    """Split the document into pages to work/split."""
+    mkdir(SPLIT_DIR)
+    dest = f"{SPLIT_DIR}/{prefix}"
+    split_files = dest + "*.png"
+    if force:
+        delete_files(split_files)
+    if count_files(split_files) == expected_pages:
+        print(f"Pages already split to directory '{SPLIT_DIR}'")
+        return
+    print(f"Splitting {expected_pages} pages " +
+          "(single threaded, may take some time)")
+    run_command(f"pdfimages -f {first} -l {last} -png {file_name} {dest}")
+    actual_pages = count_files(split_files)
+    if actual_pages != expected_pages:
+        print("Incorrect number of split pages",
+              f"was {actual_pages} expecting {expected_pages}")
+        sys.exit(1)
+    print(f"Pages split to directory '{SPLIT_DIR}'")
+
+
+def parse_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Split a PDF file to page images.",
+        usage="gridlock_split [-f]"
+    )
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main entry point"""
+    args = parse_args()
+    config = read_config()
+    file_name = get_config(config, "split", "input")
+    first = get_config(config, "split", "first_page")
+    last = get_config(config, "split", "last_page")
+    prefix = get_config(config, "split", "prefix")
+    expected_pages = get_num_pages(config)
+    split_page_images(file_name, first, last, prefix,
+                      expected_pages, args.force)
+    print("Now set crop details in config file and run 'gridlock crop'")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

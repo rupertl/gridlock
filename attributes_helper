@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# usage: attributes_helper KEY
+#
+# Work out offsets and grid sizes for each KEY
+# Not intended to be called by end users - try gridlock segment instead
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: attributes_helper KEY"
+    exit 1
+fi
+
+KEY=$1
+FROM_FILE="pages/${KEY}.png"
+TO_FILE="attributes/${KEY}.txt"
+PRESCAN=prescan.results
+
+if [ ! -f ${PRESCAN} ]
+then
+    echo "Prescan needs to run first"
+    exit 1
+fi
+
+temp_file=$(mktemp --suffix=.pnm)
+trap 'rm -f "$temp_file"' EXIT
+
+
+if [ ! -f ${TO_FILE} ]
+then
+    SPACING=(`findmean < ${PRESCAN}`)
+    export SPC_LINE=${SPACING[0]}
+    export SPC_COL=${SPACING[1]}
+    magick ${FROM_FILE} ${temp_file}
+    export PARAMS=(`reoffset --xstep $SPC_COL --ystep $SPC_LINE ${temp_file} 2> /dev/null`)
+    echo "${FROM_FILE} grid_x_spacing ${SPC_COL}" > ${TO_FILE}
+    echo "${FROM_FILE} grid_y_spacing ${SPC_LINE}" >> ${TO_FILE}
+    echo "${FROM_FILE} y_offset ${PARAMS[2]}" >> ${TO_FILE}
+    echo "${FROM_FILE} x_offset ${PARAMS[5]}" >> ${TO_FILE}
+fi

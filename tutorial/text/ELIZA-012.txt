@@ -1,0 +1,46 @@
+          SEQLR.(ESRDR,ESF)                                                  001640
+          TRANS=SEQLR.(ESRDR,ESF)                                            001650
+          SUBST.(1,POINTR)                                                   001660
+          T'O HIT                                                            001670
+          O'E                                                                001680
+          SUBST.(POINT+1,POINTR)                                             001690
+          T'O HIT                                                            001700
+          E'L                                                                001710
+          E'L                                                                001720
+HIT        TXTPRT.(ASSMBL.(TRANS,TEST,MTLIST.(OUTPUT)),0)                    001730
+          T'O START                                                          001740
+          E'L                                                                001750
+          R* * * * * * * * * * INSERT NEW KEYWORD LIST                       001760
+NEWLST    POPTOP.(INPUT)                                                      001770
+          NEWBOT.(LSSCPY.(INPUT,LIST.(9)),KEY(HASH.                          001780
+          1(TOP.(INPUT),5)))                                                 001790
+          T'O START                                                          001800
+          R* * * * * * * * * * DUMP REVISED SCRIPT                           001810
+ENDPLA    PRINT COMMENT $WHAT IS TO BE THE NUMBER OF THE NEW SCRIPT$         001820
+          READ FORMAT SNUMB,SCRIPT                                           001830
+          LPRINT.(INPUT,SCRIPT)                                              001840
+          NEWTOP.(MEMORY,MTLIST.(OUTPUT))                                    001850
+          NEWTOP.($MEMORY$,OUTPUT)                                          001860
+          T'O DUMP, FOR I=1,1 , I .G. 4                                      001870
+DUMP      NEWBOT.(MYTRAN(I),OUTPUT)                                         001880
+          LPRINT.(OUTPUT,SCRIPT)                                             001890
+          MTLIST.(OUTPUT)                                                    001900
+          T'O WRITE, FOR I=0,1, I .G. 32                                     001910
+POPMOR    W'R LISTMT.(KEY(I)) .E. 0, T'O WRITE                               001920
+          LPRINT.(POPTOP.(KEY(I)),SCRIPT)                                    001930
+          T'O POPMOR                                                         001940
+WRITE     CONTINUE                                                           001950
+          LPRINT.(MTLIST.(INPUT),SCRIPT)                                     001960
+          EXIT.                                                              001970
+          R* * * * * * * * * * SCRIPT ERROR EXIT                           001980
+NOMACH(1) PRINT COMMENT $PLEASE CONTINUE $                                 002200
+          T'O START                                                          002210
+NOMACH(2) PRINT COMMENT $HMMM $                                            002220
+          T'O START                                                         002230
+NOMACH(3) PRINT COMMENT $GO ON , PLEASE $                                  002240
+          T'O START                                                          002250
+NOMACH(4) PRINT COMMENT $I SEE $                                           002260
+          T'O START                                                          002270
+          VECTOR VALUES SNUMB= $I3 * $                                       002280
+          E'M                                                                002290
+

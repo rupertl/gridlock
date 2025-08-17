@@ -1,0 +1,62 @@
+     P       TXTPRT.(OUT,O)                                              000320
+     DONE    IRALST.(OUT)                                                000330
+             F'N                                                         000340
+             E'N                                                         000350
+                                                                         006340
+             EXTERNAL FUNCTION(LST,TAPE)                                 006350
+             NORMAL MODE IS INTEGER                                      006360
+             ENTRY TO LPRINT.                                            006370
+             BLANK = $ $                                                 006380
+             EXECUTE PLACE.(TAPE,O)                                      006390
+             LEFTP = 606074606060K                                       006400
+             RIGHTP= 606034606060K                                       006410
+             BOTH = 607460603460K                                        006420
+             EXECUTE NEWTOP.(SEQRDR.(LST),LIST.(STACK))                  006430
+             S=POPTOP.(STACK)                                            006440
+ BEGIN       EXECUTE PLACE.(LEFTP,1)                                     006450
+ NEXT        WORD=SEQLR.(S,FLAG)                                         006460
+             W'R FLAG .L. O                                              006470
+             EXECUTE PLACE.(WORD,1)                                      006480
+             W'R S .G. O, PLACE.(BLANK,1)                                006490
+             T'O NEXT                                                    006500
+             OR W'R FLAG .G. O                                           006510
+             EXECUTE PLACE.(RIGHTP,1)                                    006520
+             W'R LISTMT.(STACK) .E. O, T'O DONE                          006530
+             S=POPTOP.(STACK)                                            006540
+             T'O NEXT                                                    006550
+             OTHERWISE                                                   006560
+             W'R LISTMT.(WORD) .E. O                                     006570
+             EXECUTE PLACE.(BOTH,1)                                      006580
+             T'O NEXT                                                    006590
+             OTHERWISE                                                   006600
+             EXECUTE NEWTOP.(S,STACK)                                    006610
+             S=SEQRDR.(WORD)                                             006620
+             T'O BEGIN                                                   006630
+             E'L                                                         006640
+             E'L                                                         006650
+ DONE        EXECUTE PLACE.(O,-1)                                        006660
+             EXECUTE IRALST.(STACK)                                      006670
+             FUNCTION RETURN LST                                         006680
+             END OF FUNCTION
+                                                                         000010
+             EXTERNAL FUNCTION(CAND,S)                                   000020
+             NORMAL MODE IS INTEGER                                      000030
+             DIMENSION FIRST(5),SECOND(5)                                000040
+             ENTRY TO TESTS.                                             000050
+             STORE=S                                                     000060
+             READER=SEQRDR.(CAND)                                        000070
+             T'H ONE, FOR I=0,1, I .G. 100                               000080
+             FIRST(I)=SEQLR.(READER,FR)                                  000090
+ ONE         W'R READER .G. O, T'O ENDONE                                000100
+ ENDONE      SEQLL.(S,F)                                                 000110
+             T'H TWO, FOR J=0,1, J .G. 100                               000120
+             SECOND(J)=SEQLR.(S,F)                                       000130
+ TWO         W'R S .G. O, T'O ENDTWO                                     000140
+ ENDTWO      W'R I .NE. J, F'N O                                         000150
+             T'H LOOK, FOR K=0,1, K .G. J                                
+             W'R FIRST(K) .NE. SECOND(K), F'N O                          000170
+ LOOK        EQL=SEQLR.(READER,FR)                                       000180
+             W'R EQL .NE. $=$                                            000190
+             SEQLL.(READER,FR)                                           000200
+             F'N READER                                                  000210
+

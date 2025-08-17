@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+
+"""If all merge files are present, create an output file."""
+
+import argparse
+import sys
+from util import MERGED_DIR, read_config, get_config
+from util import count_files, run_command, get_num_pages
+
+
+def get_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Collect merged pages to a single file.",
+        usage="gridlock_collect [-f]"
+    )
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force creation of files.')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main program."""
+    args = get_args()
+    config = read_config()
+    prefix = get_config(config, "split", "prefix")
+    output_file = f"{prefix}.txt"
+    if count_files(output_file) == 1 and not args.force:
+        print(f"{output_file} already exists")
+        sys.exit(0)
+    expected_pages = get_num_pages(config)
+    input_files = f"{MERGED_DIR}/{prefix}-*.txt"
+    actual_pages = count_files(input_files)
+    if expected_pages != actual_pages:
+        print("Not all pages have been merged yet")
+        sys.exit(1)
+    run_command(f"cat {input_files} > {output_file}")
+    print(f"{output_file} created")
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

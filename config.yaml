@@ -1,0 +1,38 @@
+---
+split:
+  # Set this to the full path the PDF you are extracting text from
+  input: ""
+  # Set this to a short prefix to identify your files, eg ABC
+  prefix: ""
+  # Set this to be the first page in the PDF where code is
+  first_page: 1
+  # Set this tiobe the last page in the PDF where code is
+  last_page: 1
+  # Uncomment and set this if you have manually adjusted the
+  # number of pages to extract from
+  #num_pages: 1
+crop:
+  # After running gridlock split, look at the images and
+  # choose [x, y] coordinates for top left and bottom right extents
+  # of code on the page. You want to crop out page headers,
+  # perforations etc.
+  crop_from: [0, 0]
+  crop_to: [0, 0]
+grid:
+  # Adjust this if gridlock templates is not distinguishing characters
+  # from whitespace. Higher values mean look for more pixels set in a
+  # grid square.
+  variance_threshold: 3000
+template:
+  # If your code always starts on a certain column set this
+  char_left_margin: 0
+  # Define the line length to pad to
+  char_rigjt_pad: 80
+text:
+  # These cannot be changed right now
+  ocr_system: "gemini"
+  ocr_strategy: "page"
+  # Change this if you want to try different models. Flash models
+  # generally do not produce good results.
+  gemini_model: "gemini-2.5-pro"
+

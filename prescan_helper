@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# usage: prescan_helper FROM_FILE
+#
+# Temporarily convert FROM_FILE to a .PNM and run segment on it to get
+# an idea of its grid attributes
+# This is not supposed to be run by end users: use 'gridlock segment'
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: prescan_helper FROM_FILE"
+    exit 1
+fi
+
+FROM_FILE=$1
+
+prefix=`basename ${FROM_FILE} .png`-XXXXX
+temp_file=$(mktemp ${prefix} --suffix=.pnm)
+trap 'rm -f "$temp_file"' EXIT
+
+magick ${FROM_FILE} ${temp_file}
+segment ${temp_file}

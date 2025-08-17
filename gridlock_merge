@@ -1,0 +1,95 @@
+#!/usr/bin/python3
+
+"""Merge two files, one (the template) containing character
+positioning, the other containing the text.
+
+For example
+    template = "  ###  # ## "
+    text     = "abc d     ef"
+    output   = "  abc  d ef "
+
+"""
+
+import argparse
+import sys
+from merge import merge
+from util import TEXT_DIR, TEMPLATES_DIR, MERGED_DIR
+from util import read_config, get_config, parallel_task
+from util import delete_files, count_files, mkdir
+
+
+def merge_one_page(page_key, debug, force):
+    """Merge a single page."""
+    template_file = f"{TEMPLATES_DIR}/{page_key}.txt"
+    text_file = f"{TEXT_DIR}/{page_key}.txt"
+    merged_file = f"{MERGED_DIR}/{page_key}.txt"
+
+    mkdir(MERGED_DIR)
+    if count_files(merged_file) == 1:
+        if force:
+            delete_files(merged_file)
+        else:
+            print("File already exists")
+            sys.exit(0)
+
+    status, report = merge(template_file, text_file, margin=1, debug=debug)
+    if debug:
+        sign = '✔' if status else '✗'
+        print(f"{sign} {page_key}")
+        show_report = True
+    else:
+        show_report = status
+    if show_report:
+        with open(merged_file, "w",
+                  encoding='utf-8') if not debug else sys.stdout as f:
+            for line in report:
+                f.write(line)
+
+    sys.exit(0 if status else 1)
+
+
+def merge_all_pages(prefix, force):
+    """Merge all templates and texts."""
+    parallel_task(prefix=prefix, input_dir=TEXT_DIR, output_dir=MERGED_DIR,
+                  input_ext="txt", output_ext="txt",
+                  action="merging", command="gridlock_merge", force=force)
+
+
+def get_args():
+    """Parse the command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Combine template and text identified by the page key.",
+        usage="gridlock_merge [-d] [-f] [PAGE-KEY]"
+    )
+
+    parser.add_argument('-d', action='store_true',
+                        dest='debug', help='Enable debug mode to show " +\
+                        "mismatches between text and template.')
+
+    parser.add_argument('-f', action='store_true',
+                        dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('page_key', type=str, nargs='?', default='all',
+                        help='The required page key, eg "XYZ-001".' +
+                        'If not provided, or "all" is speciefied, ' +
+                        'will merge all pending pages')
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    """Main program."""
+    args = get_args()
+
+    if args.page_key == 'all':
+        config = read_config()
+        prefix = get_config(config, "split", "prefix")
+        merge_all_pages(prefix, args.force)
+        print("Now run 'gridlock collect'")
+    else:
+        merge_one_page(args.page_key, args.debug, args.force)
+
+
+if __name__ == "__main__":
+    main()

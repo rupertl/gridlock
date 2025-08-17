@@ -1,8 +1,8 @@
 # Gridlock Commands
 
 All commands can be accessed via the front end `gridlock`. Apart from
-`gridlock new`, be sure to set up the code and install prerequisites
-as per the README before starting.
+`gridlock new`, be sure to set up the virtual env and install prerequisites
+as per the [README](./README.md) before starting.
 
 ```
 $ gridlock -h
@@ -96,8 +96,8 @@ gridlock templates [-f] PAGE_KEY
 ```
 
 Takes the info from `PREFIX.json` and creates two things: a) a set of
-images in `grids/` showing where the grid has been placed and which
-cells are non whitespace b) a set of template text files in
+diagnostic images in `grids/` showing where the grid has been placed
+and which cells are non whitespace b) a set of template text files in
 `templates/`.
 
 ## gridlock text

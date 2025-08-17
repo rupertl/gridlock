@@ -6,14 +6,15 @@ manually extracted text from it and then
 emulator, so we have a good baseline to compare to.
 
 Before you begin, make sure you have followed the prerequisite steps
-in the README to install dependencies, set up your LLM API key and
+in the [README](../README.md) to install dependencies, set up your LLM API key and
 build the virtual env.
 
 ## Set up the project
 
-Create a new project directory (replace `/path/to/directory` with
-whatever directory you have cloned the source of gridlock to, and make
-the new directory somewhere outside of this source tree).
+`gridlock new` will create a new project directory (replace
+`/path/to/directory` with whatever directory you have cloned the
+source of gridlock to, and make the new directory somewhere outside of
+this source tree).
 
 ```
 $ /path/to/gridlock/gridlock new ./ELIZA
@@ -83,10 +84,11 @@ $ rm split/ELIZA-0*[13579].png
 If you look at the image files in `split/` you will see each page has
 material we don't need such as the perforations and license logo. We
 need to identify a good top-left and bottom-right coordinate to crop
-all pages to, where [0,0] is the top left corner of the page. Looking
-at the images I selected [400, 50] and [1750, 1650]. You can leave
-whitespace surrounding the page. Edit `config.yaml` and change the
-`crop` section to be:
+all pages to, where [0,0] is the x and y coordinates of top left
+corner of the page. Looking at the images I selected [400, 50] and
+[1750, 1650]. You don't have to precisely remove whitespace
+surrounding the page. Edit `config.yaml` and change the `crop` section
+to be:
 
 ```
 crop:
@@ -109,12 +111,12 @@ difference.
 
 ## Straighten the pages
 
-When you looked at the cropped files you probably noticed they were
-slanted. We use the deskew program to correct this. Run `gridlock
-straighten` to do this for all pages.
+When you looked at the cropped files you probably noticed they had a
+vertical skew. We use the `deskew` program to correct this. Run
+`gridlock straighten` to do this for all pages.
 
 ```
-$  gridlock straighten
+$ gridlock straighten
 Running straighten for 7 files
 100% 7:0=1s ELIZA-000 
 Now visually check straightened files and run 'gridlock segment'
@@ -125,11 +127,11 @@ Look at the image files in `pages/` to see the effect this has had.
 ## Estimate the grid
 
 The next step is to find good values for the grid - what is the size
-of each cell that contains a character and what is a good offset to
-extract text from on each page. Run `gridlock segment`.
+of each cell that contains a character and what is a good bounding box
+for the text on each page. Run `gridlock segment`.
 
 ```
-gridlock  segment
+$ gridlock segment
 Running prescan
 100% 7:0=0s pages/ELIZA-012.png
 Running segment for 7 files
@@ -139,7 +141,8 @@ Now run 'gridlock templates' and 'gridlock text'
 ```
 
 The output is in `ELIZA.json` and if you take a quick look you can see
-the values it has chosen for each page:
+the values it has chosen for each page: The grid spacing is the same
+for each page, but the x and y offsets can differ.
 
 ```
     "ELIZA-006": {
@@ -266,7 +269,7 @@ get failures, check that your Gemini account is set up and linked to a
 credit card**
 
 If you don't want to try this right now, you can substitute the files
-I got on my run by copying them from `[original-text](./original-text) to your
+I got on my run by copying them from [`original-text`](./original-text) to your
 `text/` directory.
 
 If you do want to try this, run `gridlock text`
@@ -597,7 +600,7 @@ Running merging for 7 files
 Now run 'gridlock collect'
 ```
 
-## Collect output file
+## Collect the complete output file
 
 Finally run, `gridlock collect` to produce a single text file
 `ELIZA.txt` from all the merged files:
@@ -609,7 +612,7 @@ ELIZA.txt created
 
 ## Evaluation
 
-In all, this cost $0.66 in API costs and around 30 minutes of manual
+In all, this cost $0.66 in LLM API calls and around 30 minutes of manual
 work to complete, so 9.5c and around 4 minutes per page.
 
 We can now compare the output [ELIZA.txt](./ELIZA.txt) to the manually
@@ -681,7 +684,7 @@ satisfying in getting a page to merge, like playing a 2D puzzle game.
 
 The pessimistic view is that our job here seemingly is to fix errors
 made by the AI (welcome to the future of work!), and the
-hallucinations it makes cast doubt over the accuracy of this process.
-The experimental results look good, so you may be able to accept that.
-but it's also valid that you may find this off-putting and would prefer
-something more deterministic.
+hallucinations it makes cast doubt on its accuracy. The experimental
+results look good, so you may be able to accept that. but it's also
+valid that you may find this off-putting and would prefer something
+more deterministic.

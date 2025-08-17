@@ -6,20 +6,20 @@ into a PDF. The code is often in uncommon languages and has particular
 format requirements, such as column positioning. 
 
 Often researchers want to extract the text, for analysis or to get it
-running again, but existing techniques to extract source code text are
-not ideal. Traditional OCR (optical character recognition) systems do
-a poor job at positioning characters correctly on the page, and often
+running again, but existing techniques to get source code text are not
+ideal. Traditional OCR (optical character recognition) systems do a
+poor job at positioning characters correctly on the page, and often
 stumble at accurately extracting computer code as they are trained on
-prose. You can always manually read the code and type it in again, but
+prose. You can always read the code and manually type it in again, but
 bitter experience shows that this is a tedious job and you will make
 many typos.
 
 Gridlock is an attempt to address this, combining a grid
-[segmenter]((https://gtoal.com/src/OCR/README-OCR.html)) with LLM
-(Large Language Model) OCR techniques to produce a fast and quite
-accurate result. The system uses the Google [Gemini 2.5
-Pro](https://aistudio.google.com/) model right now, but with some
-coding it should work with other LLMs.
+[segmenter](https://gtoal.com/src/OCR/README-OCR.html) with LLM (Large
+Language Model) OCR techniques to produce a fast and quite accurate
+result, with some manual intervention. The system uses the Google
+[Gemini 2.5 Pro](https://aistudio.google.com/) model right now, but
+with some coding it should work with other LLMs.
 
 ## How it works
 
@@ -69,7 +69,8 @@ REPLACE IN MEX FROM 1W1.     9-2   M115            9-2             P027R190
 Note that the character recognition is quite good, but the character
 positioning is not. The horizontal positioning is not right for the
 middle three columns, and also note that the left hand column has
-different vertical spacing from the original and the rest of the text.
+different vertical spacing from the original and relative to the rest
+of the text.
 
 The final stage is to merge the template and text to form the output.
 This is where some manual intervention is needed. The system will try
@@ -97,11 +98,11 @@ As a test, in August 2025 I ran Gridlock on a PDF where manual text
 extraction had been done previously and the code had been checked by
 executing it.
 
-* 7 pages were run through the system
-* It took around 30 minutes to complete the process
-* It cost $0.66 in LLM API calls
-* It was 100% accurate on character placement
-* It was 99.84% accurate on character recognition, getting 51 characters wrong out of a total of 32643
+* 7 pages were run through the system.
+* It took around 30 minutes to complete the process.
+* It cost $0.66 in LLM API calls.
+* It was 100% accurate on character placement.
+* It was 99.84% accurate on character recognition, getting 51 characters wrong out of a total of 32643.
 
 There are some downsides
 
@@ -171,7 +172,7 @@ in a page by adding spaces.
 Finally, you will need an API key for Gemini. The system could work
 with any LLM provider (I have done some manual tests using Claude) but
 there is only code for Gemini right now (patches for other systems
-welcome). Got to [AI Studio](https://aistudio.google.com/) and sign up
+welcome). Go to [AI Studio](https://aistudio.google.com/) and sign up
 for an API key. *You will need to use the Pro models so will have to
 provide a credit card*. First time users can get credits from Google
 Cloud which will cover the costs for many pages, however.
@@ -180,8 +181,8 @@ Cloud which will cover the costs for many pages, however.
 
 This needs to be performed once only.
 
-* Clone the code
-* In the cloned directory, make a virtual environment and install dependencies
+* Clone this repo.
+* In the cloned directory, make a virtual environment and install dependencies.
 
 ```
 python3 -m venv .venv
@@ -191,7 +192,7 @@ python3 -m pip install -r requirements.txt
 
 * Edit `gridlock.env` and add any non-system wide dependencies like
 deskew to your path there. Also change the line starting `export
-GRIDLOCK=` to point to the directory you extracted the code to.
+GRIDLOCK=` to point to the directory you cloned the code to.
 
 ## Usage
 

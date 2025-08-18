@@ -255,6 +255,10 @@ to
            ### ##### # # ## ##                                            ######
 ```
 
+This problem was likely caused by the slight fold in the paper you can
+see in the middle of the listing. Another way to solve this could be
+to process the image to cut out areas like this.
+
 You will need to do this for each file in `templates/`. If you want to
 skip ahead, you can copy my corrected files from [templates](./templates) to
 there,

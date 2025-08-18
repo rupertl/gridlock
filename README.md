@@ -23,6 +23,11 @@ with some coding it should work with other LLMs.
 
 ## How it works
 
+The input should be a PDF of fixed font line printer listings produced
+by a scanner. (PDFs from camera images do not work so well). It can
+cope with minor distortions to the image, but larger distortions would
+require some image pre-processing first.
+
 There are essentially three stages: preparation, analysis and merging.
 
 In the first stage, we break down the PDF into individual pages,

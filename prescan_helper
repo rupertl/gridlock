@@ -14,7 +14,7 @@ fi
 FROM_FILE=$1
 
 prefix=`basename ${FROM_FILE} .png`-XXXXX
-temp_file=$(mktemp ${prefix} --suffix=.pnm)
+temp_file=$(mktemp ${prefix} --suffix=.pbm)
 trap 'rm -f "$temp_file"' EXIT
 
 magick ${FROM_FILE} ${temp_file}

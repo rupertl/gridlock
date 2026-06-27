@@ -18,7 +18,7 @@ Gridlock is an attempt to address this, combining a grid
 [segmenter](https://gtoal.com/src/OCR/README-OCR.html) with LLM (Large
 Language Model) OCR techniques to produce a fast and quite accurate
 result, with some manual intervention. The system uses the Google
-[Gemini 2.5 Pro](https://aistudio.google.com/) model right now, but
+[Gemini 3.5 Flash](https://aistudio.google.com/) model right now, but
 with some coding it should work with other LLMs.
 
 ## How it works
@@ -178,9 +178,11 @@ Finally, you will need an API key for Gemini. The system could work
 with any LLM provider (I have done some manual tests using Claude) but
 there is only code for Gemini right now (patches for other systems
 welcome). Go to [AI Studio](https://aistudio.google.com/) and sign up
-for an API key. *You will need to use the Pro models so will have to
-provide a credit card*. First time users can get credits from Google
-Cloud which will cover the costs for many pages, however.
+for an API key. Pricing and free tiers keep changing, so be prepared
+to fund your account.
+
+**As of June 2026**: the gemini-3.5-flash model works well for most
+tasks, costs are approximately $0.12 per page.
 
 ## Set up
 
@@ -221,7 +223,7 @@ The individual commands are documented in [COMMANDS.md](./COMMANDS.md).
 
 ## License
 
-Copyright 2025 Rupert Lane
+Copyright 2025-6 Rupert Lane
 
 GPL v3; see [COPYING.md](./COPYING.md)
 
@@ -255,3 +257,4 @@ rupert@timereshared.com
 ## Software extracted using this project
 
 * [IPL-V listings](https://github.com/rupertl/iplv-listings)
+* [ELIZA in SNOBOL](https://gist.github.com/rupertl/6ce415ea081db0f3a98abe0c39759e1f)

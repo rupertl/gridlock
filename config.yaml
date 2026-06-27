@@ -32,7 +32,5 @@ text:
   # These cannot be changed right now
   ocr_system: "gemini"
   ocr_strategy: "page"
-  # Change this if you want to try different models. Flash models
-  # generally do not produce good results.
-  gemini_model: "gemini-2.5-pro"
-
+  # Change this if you want to try different models.
+  gemini_model: "gemini-3.5-flash"

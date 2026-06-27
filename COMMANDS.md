@@ -114,13 +114,20 @@ text and store in `text/`.
 ## gridlock merge
 
 ```
-gridlock merge [-d] [-f] PAGE_KEY
+gridlock merge [-d] [-f] [-r] PAGE_KEY
 ```
 
 Takes the template and text and tries to merge them to `merged/`. If
 it can't, will not write a file; run with `-d` to see a row/column
 diff which you can use to correct files in either `text/` or
 `templates/`.
+
+By default, it will try to merge row-by-row first; if that fails, it
+will try column-by-column, and if that fails and debug node is on it
+will print a report based on the column-by-column match. Recent LLM
+models do a better job at vertical placement, so you may find it
+easier when debugging pages to disable column-by-column matching by
+setting the `-r` flag.
 
 ## gridlock collect
 

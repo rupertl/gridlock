@@ -149,10 +149,10 @@ class MergedPageColumns(MergedPage):
         return status
 
 
-def merge(template, text, margin=2, debug=False):
+def merge(template, text, margin=2, debug=False, by_row_only=False):
     """Factory function to create a MergedPage object."""
     by_rows = MergedPageRows(template, text)
-    if not by_rows.status:
+    if not by_rows.status and not by_row_only:
         by_cols_status, by_cols_report = try_merge_by_columns(by_rows,
                                                               margin, debug)
         if by_cols_report:

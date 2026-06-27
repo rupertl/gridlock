@@ -18,7 +18,7 @@ from util import read_config, get_config, parallel_task
 from util import delete_files, count_files, mkdir
 
 
-def merge_one_page(page_key, debug, force):
+def merge_one_page(page_key, debug, force, by_row_only=False):
     """Merge a single page."""
     template_file = f"{TEMPLATES_DIR}/{page_key}.txt"
     text_file = f"{TEXT_DIR}/{page_key}.txt"
@@ -32,7 +32,8 @@ def merge_one_page(page_key, debug, force):
             print("File already exists")
             sys.exit(0)
 
-    status, report = merge(template_file, text_file, margin=1, debug=debug)
+    status, report = merge(template_file, text_file, margin=1,
+                           debug=debug, by_row_only=by_row_only)
     if debug:
         sign = '✔' if status else '✗'
         print(f"{sign} {page_key}")
@@ -59,7 +60,7 @@ def get_args():
     """Parse the command line arguments."""
     parser = argparse.ArgumentParser(
         description="Combine template and text identified by the page key.",
-        usage="gridlock_merge [-d] [-f] [PAGE-KEY]"
+        usage="gridlock_merge [-d] [-f] [-r] [PAGE-KEY]"
     )
 
     parser.add_argument('-d', action='store_true',
@@ -68,6 +69,10 @@ def get_args():
 
     parser.add_argument('-f', action='store_true',
                         dest='force', help='Force regeneration of pages.')
+
+    parser.add_argument('-r', action='store_true',
+                        dest='by_row_only',
+                        help='Only merge by row instead of trying by column.')
 
     parser.add_argument('page_key', type=str, nargs='?', default='all',
                         help='The required page key, eg "XYZ-001".' +
@@ -88,7 +93,8 @@ def main():
         merge_all_pages(prefix, args.force)
         print("Now run 'gridlock collect'")
     else:
-        merge_one_page(args.page_key, args.debug, args.force)
+        merge_one_page(args.page_key, args.debug, args.force,
+                       args.by_row_only)
 
 
 if __name__ == "__main__":

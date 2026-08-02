@@ -181,8 +181,17 @@ welcome). Go to [AI Studio](https://aistudio.google.com/) and sign up
 for an API key. Pricing and free tiers keep changing, so be prepared
 to fund your account.
 
-**As of June 2026**: the gemini-3.5-flash model works well for most
-tasks, costs are approximately $0.12 per page.
+**As of August 2026**: the gemini-3.5-flash model works best for most
+tasks, costs are approximately $0.05 - $0.12 per page.
+
+* gemini-3.6-flash is about 20% cheaper, but is slightly worse on
+  detecting characters correctly
+* gemini-3.1-pro tends to over-correct text - if it sees an unusual
+sequence of characters it will substitute what it thinks is more
+likely - but this is often wrong.
+
+I suggest you try different models on a sample page first and pick the
+one that works best for you.
 
 ## Set up
 

@@ -32,8 +32,9 @@ def ocr_gemini(image_file, model, prompt, debug):
             print(response, file=sys.stderr)
 
     # Remove markdown quotes, if any
-    text = text.replace("```\n", "")
-    text = text.replace("```text\n", "").replace("```", "")
+    text = "\n".join(
+        line for line in text.splitlines() if not line.startswith("```")
+    )
     # Remove trailing blank line if any
     if len(text) > 2 and text[-1] == '\n' and text[-2] == '\n':
         text = text[0:-1]
